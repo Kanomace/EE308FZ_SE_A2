@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calculator</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <h1>Calculator</h1>
+    <input type="text" id="expression" placeholder="Enter an expression">
+    <br>
+    <table>
+        <tr>
+            <td><button onclick="appendCharacter('7')">7</button></td>
+            <td><button onclick="appendCharacter('8')">8</button></td>
+            <td><button onclick="appendCharacter('9')">9</button></td>
+            <td><button onclick="appendCharacter('/')">/</button></td>
+            <td><button onclick="appendCharacter('sin(')">sin</button></td>
+            <td><button onclick="appendCharacter('cos(')">cos</button></td>
+            <td><button onclick="appendCharacter('tan(')">tan</button></td>
+        </tr>
+        <tr>
+            <td><button onclick="appendCharacter('4')">4</button></td>
+            <td><button onclick="appendCharacter('5')">5</button></td>
+            <td><button onclick="appendCharacter('6')">6</button></td>
+            <td><button onclick="appendCharacter('*')">*</button></td>
+            <td><button onclick="appendCharacter('asin(')">asin</button></td>
+            <td><button onclick="appendCharacter('acos(')">acos</button></td>
+            <td><button onclick="appendCharacter('atan(')">atan</button></td>
+        </tr>
+        <tr>
+            <td><button onclick="appendCharacter('1')">1</button></td>
+            <td><button onclick="appendCharacter('2')">2</button></td>
+            <td><button onclick="appendCharacter('3')">3</button></td>
+            <td><button onclick="appendCharacter('-')">-</button></td>
+            <td><button onclick="appendCharacter('sqrt(')">sqrt</button></td>
+            <td><button onclick="appendCharacter('exp(')">exp</button></td>
+            <td><button onclick="appendCharacter('^')">^</button></td>
+        </tr>
+        <tr>
+            <td><button onclick="appendCharacter('0')">0</button></td>
+            <td><button onclick="appendCharacter('.')">.</button></td>
+            <td><button onclick="appendCharacter('(')">(</button></td>
+            <td><button onclick="appendCharacter(')')">)</button></td>
+            <td><button onclick="appendCharacter('log(')">log</button></td>
+            <td colspan="2"><button onclick="clearExpression()">Clear</button></td>
+        </tr>
+        <tr>
+            <td colspan="2"><button onclick="appendCharacter('+')">+</button></td>
+            <td colspan="2"><button onclick="appendCharacter('pi')">π</button></td>
+            <td colspan="3"><button onclick="calculate()">Calculate</button></td>
+        </tr>
+    </table>
+    <br>
+    <p id="result"></p>
+    <h2>History</h2>
+    <ul id="history"></ul>
+
+    <script>
+        function appendCharacter(character) {
+            var expression = document.getElementById("expression");
+            expression.value += character;
+            expression.focus();
+        }
+
+        function clearExpression() {
+            document.getElementById("expression").value = "";
+        }
+
+        function calculate() {
+            var expression = document.getElementById("expression").value;
+            $.ajax({
+                type: "POST",
+                url: "/calculate",
+                data: JSON.stringify({ expression: expression }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    document.getElementById("result").innerHTML = "Result: " + response.result;
+                    document.getElementById("expression").value = "";
+                    getHistory();
+                }
+            });
+        }
+
+        function getHistory() {
+            $.ajax({
+                type: "GET",
+                url: "/history",
+                success: function (response) {
+                    var historyList = document.getElementById("history");
+                    historyList.innerHTML = "";
+                    for (var i = 0; i < response.length; i++) {
+                        var item = document.createElement("li");
+                        item.appendChild(document.createTextNode(response[i]));
+                        historyList.appendChild(item);
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
